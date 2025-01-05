@@ -1,0 +1,43 @@
+{{- if .Values.applications }}
+{{- range .Values.applications }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  name: {{ required "Name is required!" .name }}
+  namespace: argocd
+  {{- if .annotations }}
+  annotations:
+    {{- toYaml .annotations | nindent 4 }}
+  {{- else }}
+  annotations:
+    notifications.argoproj.io/subscribe.on-deployed.github: ""
+    notifications.argoproj.io/subscribe.on-health-degraded.github: ""
+    notifications.argoproj.io/subscribe.on-progressing.github: ""
+    notifications.argoproj.io/subscribe.on-sync-failed.github: ""
+    notifications.argoproj.io/subscribe.on-sync-running.github: ""
+    notifications.argoproj.io/subscribe.on-sync-status-unknown.github: ""
+    notifications.argoproj.io/subscribe.on-sync-succeeded.github: ""
+  {{- end }}
+spec:
+  destination:
+    namespace: {{ .namespace | default "default" }}
+    server: https://kubernetes.default.svc
+  project: {{ .project | default "injixo" }}
+  source:
+    helm:
+      valueFiles:
+        - values.yaml
+      {{- with .additionalValueFiles }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    path: .
+    repoURL: https://github.com/peterlaudel/{{ .repoName | default .name }}-deploy.git
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+{{- end }}
+{{- end }}
