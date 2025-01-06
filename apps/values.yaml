@@ -2,5 +2,3 @@
 applications:
   - name: psychotherapie-seliger
     project: default
-    additionalValueFiles:
-      - values-staging.yaml
