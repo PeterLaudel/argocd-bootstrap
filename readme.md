@@ -7,8 +7,13 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 
 ## And that is the fun to implement argocd
 
+kubectl create namespace argocd
 kubectl apply -f argocd/configmap.yaml
 kubectl apply -n argocd -f ./argocd/install.yaml
+
+Sometimes it seems you are to quick so you need to do:
+
+kubectl rollout restart deployment argocd-server -n argocd
 
 ### SSl
 openssl genrsa -out tls.key 2048
@@ -20,3 +25,8 @@ kubectl create secret tls argocd-tls-secret --cert=tls.crt --key=tls.key --names
 
 kubectl apply -f ./argocd/ingress.yaml
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+
+
+## Apps-from-apps
+
+Copy the values-yaml to argocd "create app".
